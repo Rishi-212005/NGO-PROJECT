@@ -1,25 +1,63 @@
 # NGO Foundation Portal
 
-A full-stack (MERN) platform built to manage volunteer registrations and a clean, dynamic administration interface.
+A full-stack (MERN) platform built to manage volunteer registrations, showcase NGO initiatives, and provide a clean, dynamic administration interface for organizers.
 
-## Tech Stack
-- **Frontend**
-  - React (Vite)
-  - TypeScript
-  - TailwindCSS + shadcn/ui
-  - Framer Motion
-- **Backend**
-  - Node.js
-  - Express
-  - MongoDB (Mongoose)
+## 🚀 How the Website Works
 
-## Project Structure
+The platform is divided into two primary experiences:
 
-This is a split repository.
-- **`/src`**: Contains the React UI and pages (`AdminDashboard.tsx`, `VolunteerPage.tsx`).
-- **`/backend`**: Contains the Express Node application, models, and routes.
+### 1. Public Facing Website 
+- **Landing & Info Pages**: Visitors can explore the NGO's mission, team, and contact information.
+- **Volunteer Registration (`/volunteer`)**: A dynamic form where interested individuals can sign up to volunteer. They provide their Name, Email, Phone, Age, City, Area of Interest, and a personal message. This data is instantly securely stored in a MongoDB Atlas database.
 
-## Local Setup
+### 2. Admin Portal & Logins
+The application features **One primary Admin Login** flow:
+- **Admin Login (`/admin/login`)**: A secure gateway for NGO organizers.
+- **Admin Dashboard (`/admin/dashboard`)**: Once authenticated, admins have access to a live dashboard that fetches real-time data from MongoDB. 
+  - **Dynamic Statistics**: Automatically calculates total registered volunteers, Active Projects (based on unique areas of interest), and Regions Covered (based on unique applicant cities).
+  - **Volunteer Management**: Displays a searchable, paginated table of all applicants. Admins can click "View Details" to open a modal with the applicant's full contact information and personal messages.
+
+---
+
+## 🛠 Tech Stack
+
+- **Frontend**: React (Vite), TypeScript, TailwindCSS + shadcn/ui, Framer Motion
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB Atlas (Mongoose)
+
+---
+
+## 📂 File Structure
+
+The project utilizes a split-monorepo architecture separating the backend and the frontend:
+
+```text
+NGO-Project/
+├── backend/                  # Node.js/Express Server
+│   ├── models/               # Mongoose Database Schemas
+│   │   └── Volunteer.js      # Volunteer data model
+│   ├── routes/               # Express API endpoints
+│   │   └── volunteers.js     # GET/POST logic for registrations & stats
+│   ├── server.js             # Main backend entry point
+│   └── .env                  # Environment Variables (MONGODB_URI)
+│
+├── src/                      # React Frontend Source Code
+│   ├── components/           # Reusable UI components (Navbar, Footer, Modals)
+│   ├── pages/                # Main Application Views
+│   │   ├── AdminDashboard.tsx# Protected admin control panel
+│   │   ├── AdminLoginPage.tsx# Admin authentication page
+│   │   ├── VolunteerPage.tsx # Registration form
+│   │   └── Index.tsx         # Landing page
+│   ├── App.tsx               # Primary React Router / App Wrapper
+│   └── index.css             # Tailwind base styles
+│
+├── vite.config.ts            # Vite bundler & API proxy config
+└── package.json              # Frontend dependencies
+```
+
+---
+
+## 💻 Local Setup
 
 ### 1. Backend Setup
 1. Navigate to the backend directory:
@@ -30,12 +68,12 @@ This is a split repository.
    ```bash
    npm install
    ```
-3. Create a `.env` file in the `backend/` directory:
+3. Create a `.env` file in the `backend/` directory with your database URI:
    ```env
    MONGODB_URI=your_mongodb_connection_string
    PORT=5000
    ```
-4. Start the server:
+4. Start the backend:
    ```bash
    node server.js
    ```
@@ -49,16 +87,18 @@ This is a split repository.
    ```bash
    npm run dev
    ```
-   *(Vite proxy will automatically route `/api/*` requests to your backend on port 5000)*
+   *(Vite proxy will automatically route all `/api/*` frontend fetch requests directly to your local backend on port 5000)*
 
-## Deployment
+---
 
-The repository is built for split deployment architectures:
-1. **Frontend Deployment**: Connect the root repository to **Vercel** or **Netlify**. Ensure the build command is `npm run build` and output folder is `dist`. Add the Environment Variable `VITE_API_URL` pointing to your deployed Backend URL.
-2. **Backend Deployment**: Connect the `/backend` folder explicitly to **Render**, **Railway**, or **Heroku**. Add your `MONGODB_URI` environment variable.
+## 🌐 Deployment Instructions
 
-## API Documentation
+This repository is optimized for modern continuous deployment:
+1. **Frontend (Vercel / Netlify)**: Deploy the root repository (`/`). Ensure the build command is `npm run build` and the output folder is `dist`. Add a `VITE_API_URL` environment variable pointing to your deployed backend.
+2. **Backend (Render / Railway)**: Explicitly deploy the `/backend` folder. Set your `MONGODB_URI` environment variable so the production server can authenticate with MongoDB Atlas.
 
-- `POST /api/volunteers` - Registers a new volunteer directly to MongoDB. Requires standard JSON body (name, email, phone, city, etc.).
-- `GET /api/volunteers` - Fetches all volunteers (sorted by recency).
-- `GET /api/volunteers/stats` - Compiles and returns aggregate dynamics dynamically calculated from the volunteer database.
+---
+
+## 👨‍💻 Contributors
+
+- **Sai Rishi Kumar** ([@Rishi-212005](https://github.com/Rishi-212005)) - *Full Stack Developer & Architect*
