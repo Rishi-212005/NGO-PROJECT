@@ -4,6 +4,7 @@ import { CheckCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/lib/utils";
 
 const VolunteerPage = () => {
   const { toast } = useToast();
@@ -27,7 +28,7 @@ const VolunteerPage = () => {
 
     setLoading(true);
     try {
-      const apiUrl = `${import.meta.env.VITE_API_URL || ''}/api/volunteers`;
+      const apiUrl = getApiUrl('/api/volunteers');
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

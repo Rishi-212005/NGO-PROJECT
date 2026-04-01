@@ -8,6 +8,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
+import { getApiUrl } from "@/lib/utils";
 
 interface Volunteer {
   _id: string;
@@ -26,11 +27,6 @@ const AdminDashboard = () => {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [stats, setStats] = useState({ activeProjects: 12, statesCovered: 15 });
   const [loading, setLoading] = useState(true);
-
-  // Helper macro for dynamic API path prefixing
-  const getApiUrl = (path: string) => {
-    return `${import.meta.env.VITE_API_URL || ''}${path}`;
-  };
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_demo") !== "true") {

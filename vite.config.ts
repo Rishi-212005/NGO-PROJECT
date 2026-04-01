@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
     proxy: {
-      '/api': 'http://localhost:5000',
+      '/api': 'https://ngo-backend-lm8i.onrender.com',
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
