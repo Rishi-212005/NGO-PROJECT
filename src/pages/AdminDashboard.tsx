@@ -9,25 +9,61 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 
-const volunteers = [
-  { name: "Aarav Mehta", email: "aarav.mehta@email.com", phone: "+91 91234 56780", address: "42 MG Road, Bengaluru, Karnataka 560001" },
-  { name: "Sneha Reddy", email: "sneha.reddy@email.com", phone: "+91 98765 43211", address: "15 Banjara Hills, Hyderabad, Telangana 500034" },
-  { name: "Rohan Gupta", email: "rohan.gupta@email.com", phone: "+91 87654 32109", address: "78 Civil Lines, Jaipur, Rajasthan 302006" },
-  { name: "Priya Nair", email: "priya.nair@email.com", phone: "+91 99887 76655", address: "3A Marine Drive, Kochi, Kerala 682031" },
-  { name: "Karthik Iyer", email: "karthik.iyer@email.com", phone: "+91 90011 22334", address: "56 T Nagar, Chennai, Tamil Nadu 600017" },
-  { name: "Meera Joshi", email: "meera.joshi@email.com", phone: "+91 88990 11223", address: "22 FC Road, Pune, Maharashtra 411004" },
-  { name: "Arjun Patel", email: "arjun.patel@email.com", phone: "+91 77665 54433", address: "9 CG Road, Ahmedabad, Gujarat 380006" },
-  { name: "Divya Sharma", email: "divya.sharma@email.com", phone: "+91 96543 21098", address: "101 Connaught Place, New Delhi 110001" },
-];
+interface Volunteer {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  city?: string;
+  interest?: string;
+  message?: string;
+  createdAt: string;
+}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<typeof volunteers[0] | null>(null);
+  const [selected, setSelected] = useState<Volunteer | null>(null);
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+  const [stats, setStats] = useState({ activeProjects: 12, statesCovered: 15 });
+  const [loading, setLoading] = useState(true);
+
+  // Helper macro for dynamic API path prefixing
+  const getApiUrl = (path: string) => {
+    return `${import.meta.env.VITE_API_URL || ''}${path}`;
+  };
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_demo") !== "true") {
       navigate("/admin/login");
+      return;
     }
+
+    const fetchData = async () => {
+      try {
+        // Fetch both concurrently
+        const [volRes, statsRes] = await Promise.all([
+          fetch(getApiUrl('/api/volunteers')),
+          fetch(getApiUrl('/api/volunteers/stats'))
+        ]);
+        
+        const volData = await volRes.json();
+        const statsData = await statsRes.json();
+
+        if (volData.success) setVolunteers(volData.data);
+        if (statsData.success) {
+          setStats({
+            activeProjects: statsData.data.activeProjects,
+            statesCovered: statsData.data.statesCovered
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch platform data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -61,8 +97,8 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
             {[
               { label: "Registered Volunteers", value: volunteers.length, icon: Users },
-              { label: "Active Projects", value: 12, icon: Heart },
-              { label: "States Covered", value: 15, icon: MapPin },
+              { label: "Active Projects", value: stats.activeProjects, icon: Heart },
+              { label: "States Covered", value: stats.statesCovered, icon: MapPin },
             ].map((s) => (
               <div key={s.label} className="bg-card border border-border rounded-2xl p-6 flex items-center gap-4 shadow-sm">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -155,10 +191,28 @@ const AdminDashboard = () => {
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                   <MapPin className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <div className="text-xs text-muted-foreground">Address</div>
-                    <div className="text-foreground">{selected.address}</div>
+                    <div className="text-xs text-muted-foreground">City</div>
+                    <div className="text-foreground">{selected.city || 'N/A'}</div>
                   </div>
                 </div>
+                {selected.interest && (
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                    <Heart className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Interest</div>
+                      <div className="text-foreground">{selected.interest}</div>
+                    </div>
+                  </div>
+                )}
+                {selected.message && (
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                    <Mail className="w-4 h-4 mt-0.5 text-muted-foreground" />
+                    <div>
+                      <div className="text-xs text-muted-foreground">Message</div>
+                      <div className="text-foreground text-sm mt-1">{selected.message}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

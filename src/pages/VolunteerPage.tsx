@@ -16,14 +16,36 @@ const VolunteerPage = () => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.phone) {
       toast({ title: "Please fill all required fields", variant: "destructive" });
       return;
     }
-    setSubmitted(true);
-    toast({ title: "Registration submitted successfully! 🎉" });
+
+    setLoading(true);
+    try {
+      const apiUrl = `${import.meta.env.VITE_API_URL || ''}/api/volunteers`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setSubmitted(true);
+        toast({ title: "Registration submitted successfully! 🎉" });
+      } else {
+        toast({ title: "Failed to submit", description: data.error?.join(', ') || data.error || 'Server error', variant: "destructive" });
+      }
+    } catch (err) {
+      toast({ title: "Network error", description: "Failed to reach the server.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -102,8 +124,8 @@ const VolunteerPage = () => {
               <label className="block text-sm font-medium text-foreground mb-1.5">Why do you want to volunteer?</label>
               <textarea name="message" value={form.message} onChange={handleChange} rows={4} className="w-full px-4 py-3 rounded-xl bg-background border border-input text-foreground focus:ring-2 focus:ring-ring focus:outline-none transition resize-none" placeholder="Tell us about yourself..." />
             </div>
-            <button type="submit" className="w-full py-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:brightness-110 transition-all text-lg">
-              Submit Registration
+            <button type="submit" disabled={loading} className="w-full py-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:brightness-110 transition-all text-lg disabled:opacity-70 disabled:cursor-not-allowed">
+              {loading ? "Submitting..." : "Submit Registration"}
             </button>
           </motion.form>
         </div>
